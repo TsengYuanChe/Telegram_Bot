@@ -1,0 +1,12 @@
+{
+    "update_id": 123456789,
+    "message": {
+        "message_id": 1,
+        "chat": {
+            "id": 123456789,
+            "first_name": "Test",
+            "type": "private"
+        },
+        "text": "Hello"
+    }
+}

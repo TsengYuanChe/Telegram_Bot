@@ -24,6 +24,9 @@ public class TelegramController : ControllerBase
         };
         
         Console.WriteLine($"Received update: {update}");
+        Console.WriteLine($"ChatId: {update.Message?.Chat.Id}");
+        Console.WriteLine($"MessageText: {update.Message?.Text}");
+
 
         if (update.Message?.Text != null)
         {
