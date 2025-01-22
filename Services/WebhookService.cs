@@ -19,6 +19,6 @@ public class WebhookService
             throw new ArgumentException("WebhookUrl 未設置於 appsettings.json 中");
         }
 
-        await _botClient.SetWebhookAsync(webhookUrl);
+        await _botClient.SetWebhook(webhookUrl);
     }
 }

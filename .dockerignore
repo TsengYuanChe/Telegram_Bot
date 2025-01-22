@@ -1,0 +1,16 @@
+# 忽略編譯生成的文件
+bin/
+obj/
+
+# 忽略用戶配置文件
+*.user
+*.suo
+.vs/
+
+# 忽略版本控制文件
+.git/
+.gitignore
+
+# 忽略敏感文件
+*.env
+secrets.json

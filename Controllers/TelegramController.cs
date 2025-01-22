@@ -19,13 +19,13 @@ public class TelegramController : ControllerBase
     {
         if (update == null) return Ok();
 
-        if (update.Type == UpdateType.Message && update.Message.Text != null)
+        if (update.Message?.Text != null)
         {
             var chatId = update.Message.Chat.Id;
             var messageText = update.Message.Text;
 
             var reply = $"你說了: {messageText}";
-            await _botClient.SendTextMessageAsync(chatId, reply);
+            await _botClient.SendMessage(chatId, reply);
         }
 
         return Ok();
