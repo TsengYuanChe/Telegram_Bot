@@ -45,3 +45,12 @@
 /Users/tseng/Desktop/code/practice/TelegramBotApp/obj/Debug/net6.0/TelegramBotApp.genruntimeconfig.cache
 /Users/tseng/Desktop/code/practice/TelegramBotApp/obj/Debug/net6.0/ref/TelegramBotApp.dll
 /Users/tseng/Desktop/code/practice/TelegramBotApp/bin/Debug/net6.0/test.json
+/Users/tseng/Desktop/code/practice/TelegramBotApp/bin/Debug/net6.0/Microsoft.AspNetCore.Server.Kestrel.Transport.Abstractions.dll
+/Users/tseng/Desktop/code/practice/TelegramBotApp/bin/Debug/net6.0/Microsoft.Extensions.Configuration.dll
+/Users/tseng/Desktop/code/practice/TelegramBotApp/bin/Debug/net6.0/Microsoft.Extensions.Diagnostics.Abstractions.dll
+/Users/tseng/Desktop/code/practice/TelegramBotApp/bin/Debug/net6.0/Microsoft.Extensions.FileProviders.Abstractions.dll
+/Users/tseng/Desktop/code/practice/TelegramBotApp/bin/Debug/net6.0/Microsoft.Extensions.Hosting.Abstractions.dll
+/Users/tseng/Desktop/code/practice/TelegramBotApp/bin/Debug/net6.0/Microsoft.Extensions.Logging.Abstractions.dll
+/Users/tseng/Desktop/code/practice/TelegramBotApp/bin/Debug/net6.0/System.Diagnostics.DiagnosticSource.dll
+/Users/tseng/Desktop/code/practice/TelegramBotApp/bin/Debug/net6.0/System.IO.Pipelines.dll
+/Users/tseng/Desktop/code/practice/TelegramBotApp/bin/Debug/net6.0/System.Runtime.CompilerServices.Unsafe.dll
