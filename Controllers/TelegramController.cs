@@ -14,39 +14,32 @@ public class TelegramController : ControllerBase
         _botClient = botClient;
     }
 
- [HttpPost]
+    [HttpPost]
     public async Task<IActionResult> Post()
     {
-        // 嘗試讀取原始請求內容
-        string rawRequest = string.Empty;
-        try
-        {
-            using (var reader = new StreamReader(HttpContext.Request.Body, leaveOpen: true))
-            {
-                rawRequest = await reader.ReadToEndAsync();
-                HttpContext.Request.Body.Position = 0; // 重設流的位置，確保後續處理不受影響
-            }
+        // 複製請求流
+        using var memoryStream = new MemoryStream();
+        await HttpContext.Request.Body.CopyToAsync(memoryStream);
+        memoryStream.Position = 0;
 
-            if (string.IsNullOrWhiteSpace(rawRequest))
-            {
-                Console.WriteLine("Received an empty raw request.");
-                return BadRequest("Empty request body.");
-            }
-
-            Console.WriteLine($"Received raw request: {rawRequest}");
-        }
-        catch (Exception ex)
+        // 讀取複製的請求體
+        string rawRequest;
+        using (var reader = new StreamReader(memoryStream))
         {
-            Console.WriteLine($"Error reading raw request: {ex.Message}");
-            return BadRequest("Failed to read request body.");
+            rawRequest = await reader.ReadToEndAsync();
         }
 
-        // 嘗試解析更新內容
+        if (string.IsNullOrWhiteSpace(rawRequest))
+        {
+            Console.WriteLine("Received an empty raw request.");
+            return BadRequest("Empty request body.");
+        }
+
+        Console.WriteLine($"Received raw request: {rawRequest}");
+
         try
         {
-            using var reader = new StreamReader(HttpContext.Request.Body);
             var update = Newtonsoft.Json.JsonConvert.DeserializeObject<Telegram.Bot.Types.Update>(rawRequest);
-
             if (update == null)
             {
                 Console.WriteLine("Failed to parse the update object.");
@@ -62,22 +55,15 @@ public class TelegramController : ControllerBase
 
                 Console.WriteLine($"ChatId: {chatId}, Message: {messageText}");
 
-                try
-                {
-                    await _botClient.SendMessage(chatId, $"你說了: {messageText}");
-                    Console.WriteLine("Message sent successfully.");
-                }
-                catch (Exception sendEx)
-                {
-                    Console.WriteLine($"Error sending message: {sendEx.Message}");
-                }
+                await _botClient.SendMessage(chatId, $"你說了: {messageText}");
+                Console.WriteLine("Message sent successfully.");
             }
 
             return Ok();
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error parsing or processing the update: {ex.Message}");
+            Console.WriteLine($"Error processing update: {ex.Message}");
             return BadRequest("Failed to process update.");
         }
     }
