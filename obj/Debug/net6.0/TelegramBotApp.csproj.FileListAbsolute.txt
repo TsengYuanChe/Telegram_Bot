@@ -44,3 +44,4 @@
 /Users/tseng/Desktop/code/practice/TelegramBotApp/obj/Debug/net6.0/TelegramBotApp.pdb
 /Users/tseng/Desktop/code/practice/TelegramBotApp/obj/Debug/net6.0/TelegramBotApp.genruntimeconfig.cache
 /Users/tseng/Desktop/code/practice/TelegramBotApp/obj/Debug/net6.0/ref/TelegramBotApp.dll
+/Users/tseng/Desktop/code/practice/TelegramBotApp/bin/Debug/net6.0/test.json

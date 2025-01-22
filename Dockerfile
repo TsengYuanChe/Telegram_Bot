@@ -16,7 +16,7 @@ WORKDIR /app
 COPY --from=build /app/out .
 
 # 暴露應用執行的端口
-EXPOSE 5000
+EXPOSE 8081
 
 # 啟動應用程序
-ENTRYPOINT ["dotnet", "TelegramBotApp.dll", "--urls=http://0.0.0.0:5000"]
+ENTRYPOINT ["dotnet", "TelegramBotApp.dll", "--urls=http://0.0.0.0:8081"]
