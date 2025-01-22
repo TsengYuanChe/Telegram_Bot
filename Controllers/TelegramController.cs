@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
 
 [ApiController]
 [Route("api/telegram")]
@@ -15,45 +15,37 @@ public class TelegramController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Post([FromBody] Update update)
+    public async Task<IActionResult> Post()
     {
+        string rawRequest;
+        using (var reader = new StreamReader(HttpContext.Request.Body))
+        {
+            rawRequest = await reader.ReadToEndAsync();
+        }
+        Console.WriteLine($"Received raw request: {rawRequest}");
+
         try
         {
-            using var reader = new StreamReader(HttpContext.Request.Body);
-            var rawRequest = await reader.ReadToEndAsync();
-            Console.WriteLine($"Received raw request: {rawRequest}");
-
-            if (update == null)
-            {
-                Console.WriteLine("Update is null");
-                return BadRequest("Update cannot be null");
-            }
-
+            var update = JsonConvert.DeserializeObject<Update>(rawRequest);
             Console.WriteLine($"Parsed update: {update}");
 
-            // 確認 message 是否為 null
-            if (update.Message == null)
+            if (update?.Message?.Text != null)
             {
-                Console.WriteLine("Message is null");
-                return Ok();
+                var chatId = update.Message.Chat.Id;
+                var messageText = update.Message.Text;
+
+                Console.WriteLine($"ChatId: {chatId}, Message received: {messageText}");
+
+                // 回覆消息
+                await _botClient.SendMessage(chatId, $"你說了: {messageText}");
             }
-
-            var chatId = update.Message.Chat.Id;
-            var messageText = update.Message.Text;
-
-            Console.WriteLine($"ChatId: {chatId}, Message received: {messageText}");
-
-            // 回應訊息
-            var reply = $"你說了: {messageText}";
-            await _botClient.SendMessage(chatId, reply);
-            Console.WriteLine("Message sent successfully");
-
-            return Ok();
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error processing update: {ex.Message}");
-            return BadRequest(ex.Message);
+            return BadRequest("Invalid update format");
         }
+
+        return Ok();
     }
 }
