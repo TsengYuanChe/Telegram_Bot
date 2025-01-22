@@ -54,7 +54,7 @@ public class TelegramController : ControllerBase
                 Console.WriteLine($"ChatId: {chatId}, Message: {messageText}");
 
                 // 回覆訊息
-                var reply = $"你說了: {messageText}";
+                var reply = $"{chatId}說了: {messageText}";
                 await _botClient.SendMessage(chatId, reply);
                 Console.WriteLine("Message sent successfully");
             }
