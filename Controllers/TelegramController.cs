@@ -40,7 +40,7 @@ public class TelegramController : ControllerBase
         try
         {
             var reply = $"你說了: {messageText}";
-            await _botClient.SendTextMessageAsync(chatId, reply);
+            await _botClient.SendMessage(chatId, reply);
             Console.WriteLine("Message sent successfully");
         }
         catch (Exception ex)
