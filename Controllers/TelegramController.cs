@@ -17,24 +17,35 @@ public class TelegramController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Post([FromBody] Update update)
     {
-        if (update == null) 
+        if (update == null)
         {
             Console.WriteLine("Update is null");
             return BadRequest("Update cannot be null");
-        };
-        
+        }
+
         Console.WriteLine($"Received update: {update}");
-        Console.WriteLine($"ChatId: {update.Message?.Chat.Id}");
-        Console.WriteLine($"MessageText: {update.Message?.Text}");
 
-
-        if (update.Message?.Text != null)
+        if (update.Type != UpdateType.Message || update.Message == null)
         {
-            var chatId = update.Message.Chat.Id;
-            var messageText = update.Message.Text;
+            Console.WriteLine("Update is not a message or message is null");
+            return Ok();
+        }
 
+        var chatId = update.Message.Chat.Id;
+        var messageText = update.Message.Text;
+
+        Console.WriteLine($"ChatId: {chatId}");
+        Console.WriteLine($"MessageText: {messageText}");
+
+        try
+        {
             var reply = $"你說了: {messageText}";
-            await _botClient.SendMessage(chatId, reply);
+            await _botClient.SendTextMessageAsync(chatId, reply);
+            Console.WriteLine("Message sent successfully");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error sending message: {ex.Message}");
         }
 
         return Ok();
