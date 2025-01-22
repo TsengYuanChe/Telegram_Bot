@@ -15,56 +15,45 @@ public class TelegramController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Post()
+    public async Task<IActionResult> Post([FromBody] Update update)
     {
-        // 複製請求流
-        using var memoryStream = new MemoryStream();
-        await HttpContext.Request.Body.CopyToAsync(memoryStream);
-        memoryStream.Position = 0;
-
-        // 讀取複製的請求體
-        string rawRequest;
-        using (var reader = new StreamReader(memoryStream))
-        {
-            rawRequest = await reader.ReadToEndAsync();
-        }
-
-        if (string.IsNullOrWhiteSpace(rawRequest))
-        {
-            Console.WriteLine("Received an empty raw request.");
-            return BadRequest("Empty request body.");
-        }
-
-        Console.WriteLine($"Received raw request: {rawRequest}");
-
         try
         {
-            var update = Newtonsoft.Json.JsonConvert.DeserializeObject<Telegram.Bot.Types.Update>(rawRequest);
+            using var reader = new StreamReader(HttpContext.Request.Body);
+            var rawRequest = await reader.ReadToEndAsync();
+            Console.WriteLine($"Received raw request: {rawRequest}");
+
             if (update == null)
             {
-                Console.WriteLine("Failed to parse the update object.");
-                return BadRequest("Invalid update format.");
+                Console.WriteLine("Update is null");
+                return BadRequest("Update cannot be null");
             }
 
             Console.WriteLine($"Parsed update: {update}");
 
-            if (update.Message?.Text != null)
+            // 確認 message 是否為 null
+            if (update.Message == null)
             {
-                var chatId = update.Message.Chat.Id;
-                var messageText = update.Message.Text;
-
-                Console.WriteLine($"ChatId: {chatId}, Message: {messageText}");
-
-                await _botClient.SendMessage(chatId, $"你說了: {messageText}");
-                Console.WriteLine("Message sent successfully.");
+                Console.WriteLine("Message is null");
+                return Ok();
             }
+
+            var chatId = update.Message.Chat.Id;
+            var messageText = update.Message.Text;
+
+            Console.WriteLine($"ChatId: {chatId}, Message received: {messageText}");
+
+            // 回應訊息
+            var reply = $"你說了: {messageText}";
+            await _botClient.SendMessage(chatId, reply);
+            Console.WriteLine("Message sent successfully");
 
             return Ok();
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error processing update: {ex.Message}");
-            return BadRequest("Failed to process update.");
+            return BadRequest(ex.Message);
         }
     }
 }

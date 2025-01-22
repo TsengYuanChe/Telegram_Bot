@@ -24,8 +24,10 @@ var botClient = new TelegramBotClient(botToken);
 builder.Services.AddSingleton(botClient);
 builder.Services.AddTransient<WebhookService>();
 builder.Services.AddControllers()
-       .AddNewtonsoftJson(options =>
-           options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+    .AddNewtonsoftJson(options =>
+    {
+        options.SerializerSettings.DateParseHandling = Newtonsoft.Json.DateParseHandling.None;
+    });
 builder.Services.Configure<IISServerOptions>(options =>
 {
     options.AllowSynchronousIO = true; // 啟用同步 IO，允許多次讀取
