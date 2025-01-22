@@ -26,24 +26,43 @@ public class TelegramController : ControllerBase
 
         try
         {
-            var update = JsonConvert.DeserializeObject<Update>(rawRequest);
-            Console.WriteLine($"Parsed update: {update}");
+            // 反序列化 JSON
+            var update = JsonConvert.DeserializeObject<Update>(rawRequest, new JsonSerializerSettings
+            {
+                MissingMemberHandling = MissingMemberHandling.Ignore,
+                Error = (sender, args) =>
+                {
+                    Console.WriteLine($"Deserialization error: {args.ErrorContext.Error.Message}");
+                    args.ErrorContext.Handled = true;
+                }
+            });
 
-            if (update?.Message?.Text != null)
+            if (update == null)
+            {
+                Console.WriteLine("Failed to parse update: Deserialized object is null");
+                return BadRequest("Invalid update format");
+            }
+
+            Console.WriteLine($"Parsed update: {JsonConvert.SerializeObject(update, Formatting.Indented)}");
+
+            // 處理接收到的訊息
+            if (update.Message?.Text != null)
             {
                 var chatId = update.Message.Chat.Id;
                 var messageText = update.Message.Text;
 
-                Console.WriteLine($"ChatId: {chatId}, Message received: {messageText}");
+                Console.WriteLine($"ChatId: {chatId}, Message: {messageText}");
 
-                // 回覆消息
-                await _botClient.SendMessage(chatId, $"你說了: {messageText}");
+                // 回覆訊息
+                var reply = $"你說了: {messageText}";
+                await _botClient.SendMessage(chatId, reply);
+                Console.WriteLine("Message sent successfully");
             }
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error processing update: {ex.Message}");
-            return BadRequest("Invalid update format");
+            return BadRequest("Error processing update");
         }
 
         return Ok();
