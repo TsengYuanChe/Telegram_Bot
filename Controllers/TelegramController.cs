@@ -18,9 +18,11 @@ public class TelegramController : ControllerBase
     public async Task<IActionResult> Post([FromBody] Update update)
     {
         try
-        {
-            using var reader = new StreamReader(HttpContext.Request.Body);
+        {   
+            HttpContext.Request.EnableBuffering();
+            using var reader = new StreamReader(HttpContext.Request.Body, leaveOpen: true);
             var rawRequest = await reader.ReadToEndAsync();
+            HttpContext.Request.Body.Position = 0 ;
             Console.WriteLine($"Received raw request: {rawRequest}");
 
             if (update == null)
