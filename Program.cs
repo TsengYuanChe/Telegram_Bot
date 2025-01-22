@@ -34,6 +34,7 @@ logger.LogInformation("應用程序啟動中...");
 logger.LogInformation($"環境: {app.Environment.EnvironmentName}");
 logger.LogInformation($"服務正在監聽: {app.Urls.FirstOrDefault()}");
 
+app.MapGet("/", () => "應用正在運行");
 // 設置 Webhook
 using (var scope = app.Services.CreateScope())
 {
