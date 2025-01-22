@@ -48,6 +48,10 @@
               "target": "Package",
               "version": "[6.0.15, )"
             },
+            "Microsoft.AspNetCore.Server.Kestrel.Core": {
+              "target": "Package",
+              "version": "[2.3.0, )"
+            },
             "Telegram.Bot": {
               "target": "Package",
               "version": "[22.3.0, )"
