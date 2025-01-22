@@ -14,51 +14,71 @@ public class TelegramController : ControllerBase
         _botClient = botClient;
     }
 
-    [HttpPost]
-    public async Task<IActionResult> Post([FromBody] Update update)
+ [HttpPost]
+    public async Task<IActionResult> Post()
     {
-        // 啟用請求 Body 緩衝
-        HttpContext.Request.EnableBuffering();
-
-        // 記錄原始請求
-        using (var reader = new StreamReader(HttpContext.Request.Body, leaveOpen: true))
-        {
-            var rawRequest = await reader.ReadToEndAsync();
-            Console.WriteLine($"Received raw request: {rawRequest}");
-            HttpContext.Request.Body.Position = 0; // 重置流位置
-        }
-
-        if (update == null)
-        {
-            Console.WriteLine("Update is null");
-            return BadRequest("Update cannot be null");
-        }
-
-        Console.WriteLine($"Parsed update: {update}");
-
-        if (update.Type != UpdateType.Message || update.Message == null)
-        {
-            Console.WriteLine("Update is not a message or message is null");
-            return Ok();
-        }
-
-        var chatId = update.Message.Chat.Id;
-        var messageText = update.Message.Text;
-
-        Console.WriteLine($"ChatId: {chatId}");
-        Console.WriteLine($"Message received: {messageText}");
-
+        // 嘗試讀取原始請求內容
+        string rawRequest = string.Empty;
         try
         {
-            var reply = $"你說了: {messageText}";
-            await _botClient.SendMessage(chatId, reply); // 使用正確的 SendMessage 方法
-            Console.WriteLine("Message sent successfully");
+            using (var reader = new StreamReader(HttpContext.Request.Body, leaveOpen: true))
+            {
+                rawRequest = await reader.ReadToEndAsync();
+                HttpContext.Request.Body.Position = 0; // 重設流的位置，確保後續處理不受影響
+            }
+
+            if (string.IsNullOrWhiteSpace(rawRequest))
+            {
+                Console.WriteLine("Received an empty raw request.");
+                return BadRequest("Empty request body.");
+            }
+
+            Console.WriteLine($"Received raw request: {rawRequest}");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error sending message: {ex.Message}");
+            Console.WriteLine($"Error reading raw request: {ex.Message}");
+            return BadRequest("Failed to read request body.");
         }
 
-        return Ok();
+        // 嘗試解析更新內容
+        try
+        {
+            using var reader = new StreamReader(HttpContext.Request.Body);
+            var update = Newtonsoft.Json.JsonConvert.DeserializeObject<Telegram.Bot.Types.Update>(rawRequest);
+
+            if (update == null)
+            {
+                Console.WriteLine("Failed to parse the update object.");
+                return BadRequest("Invalid update format.");
+            }
+
+            Console.WriteLine($"Parsed update: {update}");
+
+            if (update.Message?.Text != null)
+            {
+                var chatId = update.Message.Chat.Id;
+                var messageText = update.Message.Text;
+
+                Console.WriteLine($"ChatId: {chatId}, Message: {messageText}");
+
+                try
+                {
+                    await _botClient.SendMessage(chatId, $"你說了: {messageText}");
+                    Console.WriteLine("Message sent successfully.");
+                }
+                catch (Exception sendEx)
+                {
+                    Console.WriteLine($"Error sending message: {sendEx.Message}");
+                }
+            }
+
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error parsing or processing the update: {ex.Message}");
+            return BadRequest("Failed to process update.");
+        }
     }
 }
