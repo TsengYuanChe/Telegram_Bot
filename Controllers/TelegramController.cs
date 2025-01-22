@@ -17,39 +17,33 @@ public class TelegramController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Post([FromBody] Update update)
     {
-        // Debug 輸出原始請求內容
-        using var reader = new StreamReader(HttpContext.Request.Body);
-        var rawRequest = await reader.ReadToEndAsync();
-        Console.WriteLine($"Received raw request: {rawRequest}");
-
-        if (update == null)
-        {
-            Console.WriteLine("Update is null");
-            return BadRequest("Update cannot be null");
-        }
-
-        if (update.Type != UpdateType.Message || update.Message == null || update.Message.Text == null)
-        {
-            Console.WriteLine("Invalid update or no text message received.");
-            return Ok();
-        }
-
-        var chatId = update.Message.Chat.Id;
-        var messageText = update.Message.Text;
-
-        Console.WriteLine($"ChatId: {chatId}, Message: {messageText}");
-
         try
         {
-            var reply = $"你說了: {messageText}";
-            var sentMessage = await _botClient.SendMessage(chatId: chatId, text: reply);
-            Console.WriteLine($"Message sent successfully: {sentMessage.MessageId}");
+            // 檢查 update 是否為空
+            if (update == null)
+            {
+                Console.WriteLine("Update is null");
+                return BadRequest("Update cannot be null");
+            }
+
+            // 檢查是否為有效的消息
+            if (update.Type == UpdateType.Message && update.Message?.Text != null)
+            {
+                var chatId = update.Message.Chat.Id;
+                var messageText = update.Message.Text;
+
+                Console.WriteLine($"ChatId: {chatId}, Message: {messageText}");
+
+                // 回覆消息
+                await _botClient.SendMessage(chatId, $"你說了: {messageText}");
+            }
+
+            return Ok();
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error sending message: {ex.Message}");
+            Console.WriteLine($"Error processing update: {ex.Message}");
+            return StatusCode(500, "Internal Server Error");
         }
-
-        return Ok();
     }
 }
