@@ -15,7 +15,8 @@ var botClient = new TelegramBotClient(botToken);
 builder.Services.AddSingleton(botClient);
 builder.Services.AddTransient<WebhookService>();
 builder.Services.AddControllers()
-       .AddNewtonsoftJson();
+       .AddNewtonsoftJson(options =>
+           options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
 var app = builder.Build();
 

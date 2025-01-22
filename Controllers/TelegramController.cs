@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using System.IO;
 
 [ApiController]
 [Route("api/telegram")]
@@ -17,6 +18,11 @@ public class TelegramController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Post([FromBody] Update update)
     {
+        // 記錄原始請求
+        using var reader = new StreamReader(HttpContext.Request.Body);
+        var rawRequest = await reader.ReadToEndAsync();
+        Console.WriteLine($"Raw request: {rawRequest}");
+
         if (update == null)
         {
             Console.WriteLine("Update is null");
@@ -31,6 +37,13 @@ public class TelegramController : ControllerBase
             return Ok();
         }
 
+        // 確保 message 和 chat 資料存在
+        if (update.Message.Chat == null || update.Message.Text == null)
+        {
+            Console.WriteLine("Invalid message data");
+            return Ok();
+        }
+
         var chatId = update.Message.Chat.Id;
         var messageText = update.Message.Text;
 
@@ -40,7 +53,7 @@ public class TelegramController : ControllerBase
         try
         {
             var reply = $"你說了: {messageText}";
-            await _botClient.SendMessage(chatId, reply);
+            await _botClient.SendTextMessageAsync(chatId, reply); // 使用正確的 Telegram API 方法
             Console.WriteLine("Message sent successfully");
         }
         catch (Exception ex)
