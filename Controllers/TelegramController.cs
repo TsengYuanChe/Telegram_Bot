@@ -19,31 +19,32 @@ public class TelegramController : ControllerBase
     {
         try
         {
-            // 檢查 update 是否為空
+            using var reader = new StreamReader(HttpContext.Request.Body);
+            var rawRequest = await reader.ReadToEndAsync();
+            Console.WriteLine($"Received raw request: {rawRequest}");
+
             if (update == null)
             {
                 Console.WriteLine("Update is null");
                 return BadRequest("Update cannot be null");
             }
 
-            // 檢查是否為有效的消息
-            if (update.Type == UpdateType.Message && update.Message?.Text != null)
+            Console.WriteLine($"Parsed update: {update}");
+
+            // 如果有消息，處理消息
+            if (update.Message?.Text != null)
             {
+                Console.WriteLine($"Message received: {update.Message.Text}");
                 var chatId = update.Message.Chat.Id;
-                var messageText = update.Message.Text;
-
-                Console.WriteLine($"ChatId: {chatId}, Message: {messageText}");
-
-                // 回覆消息
-                await _botClient.SendMessage(chatId, $"你說了: {messageText}");
+                var reply = $"你說了: {update.Message.Text}";
+                await _botClient.SendMessage(chatId, reply);
             }
-
-            return Ok();
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error processing update: {ex.Message}");
-            return StatusCode(500, "Internal Server Error");
+            Console.WriteLine($"Error processing request: {ex.Message}");
         }
+
+        return Ok();
     }
 }
