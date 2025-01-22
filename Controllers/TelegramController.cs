@@ -17,7 +17,13 @@ public class TelegramController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Post([FromBody] Update update)
     {
-        if (update == null) return Ok();
+        if (update == null) 
+        {
+            Console.WriteLine("Update is null");
+            return BadRequest("Update cannot be null");
+        };
+        
+        Console.WriteLine($"Received update: {update}");
 
         if (update.Message?.Text != null)
         {
